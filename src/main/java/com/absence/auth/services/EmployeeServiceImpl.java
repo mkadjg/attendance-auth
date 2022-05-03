@@ -4,10 +4,15 @@ import com.absence.auth.dtos.RegisterEmployeeRequestDto;
 import com.absence.auth.models.Employee;
 import com.absence.auth.models.UserRole;
 import com.absence.auth.models.Users;
+import com.absence.auth.payloads.EmailPayload;
 import com.absence.auth.repositories.*;
 import com.absence.auth.utilities.DefaultPasswordGeneratorUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -26,6 +31,12 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Autowired
     UserRoleRepository userRoleRepository;
+
+    @Autowired
+    EmailService emailService;
+
+    @Value("${login.url}")
+    String loginUrl;
 
     @Override
     public Object register(RegisterEmployeeRequestDto dto) {
@@ -50,5 +61,27 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setUsers(newUsers);
         employee.setDivision(divisionRepository.findById(dto.getDivisionId()).orElse(null));
         return employeeRepository.save(employee);
+    }
+
+    @Override
+    public Boolean sendEmailUserRegistration(Users users) {
+        try {
+            String defaultPassword = DefaultPasswordGeneratorUtil.generateRandomPassword();
+
+            Map<String, Object> variables = new HashMap<>();
+            variables.put("username", users.getUsername());
+            variables.put("password", defaultPassword);
+            variables.put("loginUrl", loginUrl);
+
+            String emailBody = emailService.generateHtmlEmailBody("user-activation.html", variables);
+            EmailPayload emailPayload = new EmailPayload();
+            emailPayload.setSubject("New Employee Registration");
+            emailPayload.setReceiver(users.getUsername());
+            emailPayload.setEmailBody(emailBody);
+            emailService.sendEmail(emailPayload);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

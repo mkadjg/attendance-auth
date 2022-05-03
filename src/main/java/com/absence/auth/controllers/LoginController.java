@@ -61,7 +61,6 @@ public class LoginController {
         ObjectMapper mapper = new ObjectMapper();
         long now = System.currentTimeMillis();
 
-
         Users users = mapper.convertValue(authentication.getDetails(), Users.class);
         Employee employee = employeeRepository.findByUserId(users.getUserId()).orElse(null);
         String token = Jwts.builder()

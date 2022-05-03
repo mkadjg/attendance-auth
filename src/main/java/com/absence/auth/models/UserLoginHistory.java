@@ -39,4 +39,8 @@ public class UserLoginHistory {
     @Column(name = "login_date")
     private Date loginDate;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "logout_date")
+    private Date logoutDate;
+
 }

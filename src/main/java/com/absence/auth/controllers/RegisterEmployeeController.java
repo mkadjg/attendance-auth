@@ -2,6 +2,8 @@ package com.absence.auth.controllers;
 
 import com.absence.auth.dtos.RegisterEmployeeRequestDto;
 import com.absence.auth.dtos.ResponseDto;
+import com.absence.auth.exceptions.SendEmailException;
+import com.absence.auth.models.Employee;
 import com.absence.auth.services.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,14 +21,19 @@ public class RegisterEmployeeController {
     EmployeeService employeeService;
 
     @PostMapping("/register")
-    public ResponseEntity<Object> register(@RequestBody RegisterEmployeeRequestDto dto){
-        ResponseDto responseDto = ResponseDto.builder()
-                .code(HttpStatus.OK.toString())
-                .status("success")
-                .data(employeeService.register(dto))
-                .message("Successfully Register User!")
-                .build();
-        return ResponseEntity.ok(responseDto);
+    public ResponseEntity<Object> register(@RequestBody RegisterEmployeeRequestDto dto) throws SendEmailException {
+        Employee employee = (Employee) employeeService.register(dto);
+        if (employeeService.sendEmailUserRegistration(employee.getUsers())) {
+            ResponseDto responseDto = ResponseDto.builder()
+                    .code(HttpStatus.OK.toString())
+                    .status("success")
+                    .data(employee)
+                    .message("Successfully Register User!")
+                    .build();
+            return ResponseEntity.ok(responseDto);
+        } else {
+            throw new SendEmailException("Failed to send email notification!");
+        }
     }
 
 

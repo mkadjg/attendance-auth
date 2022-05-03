@@ -44,4 +44,15 @@ public class CustomExceptionHandler {
                         .build());
     }
 
+    @ExceptionHandler({SendEmailException.class})
+    public ResponseEntity<Object> sendEmailException(Exception exception) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ResponseDto.builder()
+                        .code(HttpStatus.INTERNAL_SERVER_ERROR.toString())
+                        .status(ERROR)
+                        .message(exception.getMessage())
+                        .build());
+    }
+
 }
