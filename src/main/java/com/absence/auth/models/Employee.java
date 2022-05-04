@@ -48,6 +48,12 @@ public class Employee extends BaseModel implements Serializable {
     @Column(name = "employee_phone_number")
     private String employeePhoneNumber;
 
+    @Column(name = "employee_gender")
+    private int employeeGender;
+
+    @Column(name = "is_supervisor")
+    private boolean isSupervisor;
+
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")
     private Users users;

@@ -58,6 +58,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setEmployeeBirthplace(dto.getEmployeeBirthplace());
         employee.setEmployeeEmail(dto.getEmployeeEmail());
         employee.setEmployeePhoneNumber(dto.getEmployeePhoneNumber());
+        employee.setEmployeeGender(dto.getEmployeeGender());
+        employee.setSupervisor(dto.isSupervisor());
         employee.setUsers(newUsers);
         employee.setDivision(divisionRepository.findById(dto.getDivisionId()).orElse(null));
         return employeeRepository.save(employee);

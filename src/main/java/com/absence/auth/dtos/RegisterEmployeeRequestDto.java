@@ -17,6 +17,8 @@ public class RegisterEmployeeRequestDto {
     private String employeeBirthplace;
     private String employeeEmail;
     private String employeePhoneNumber;
+    private int employeeGender;
     private String divisionId;
     private String roleId;
+    private boolean isSupervisor;
 }

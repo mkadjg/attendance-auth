@@ -31,4 +31,7 @@ public class LeaveType extends BaseModel implements Serializable {
     @Column(name = "leave_type_desc")
     private String leaveTypeDesc;
 
+    @Column(name = "default_value")
+    private int defaultValue;
+
 }
