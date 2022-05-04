@@ -41,12 +41,17 @@ public class LeaveDetail extends BaseModel implements Serializable {
     @Column(name = "total_days_off")
     private Integer totalDaysOff;
 
+    @Column(name = "sub_partner_id")
+    private String subPartnerId;
+
+    @Column(name = "supervisor_id")
+    private String supervisorId;
+
+    @Column(name = "hrd_id")
+    private String hrdId;
+
     @ManyToOne
     @JoinColumn(name = "attendance_id", referencedColumnName = "attendance_id")
     private Attendance attendance;
-
-    @ManyToOne
-    @JoinColumn(name = "sub_partner_id", referencedColumnName = "employee_id")
-    private Employee subPartner;
 
 }
