@@ -11,7 +11,6 @@ import org.hibernate.annotations.Type;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -36,7 +35,7 @@ public class Users extends BaseModel implements Serializable {
     private String password;
 
     @Column(name = "status")
-    private String status;
+    private Integer status;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "locked_until")

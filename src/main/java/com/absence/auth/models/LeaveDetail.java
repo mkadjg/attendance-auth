@@ -9,8 +9,8 @@ import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.sql.Blob;
 import java.util.Date;
-import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -41,6 +41,9 @@ public class LeaveDetail extends BaseModel implements Serializable {
     @Column(name = "total_days_off")
     private Integer totalDaysOff;
 
+    @Column(name = "document")
+    private Blob document;
+
     @Column(name = "sub_partner_id")
     private String subPartnerId;
 
@@ -50,8 +53,12 @@ public class LeaveDetail extends BaseModel implements Serializable {
     @Column(name = "hrd_id")
     private String hrdId;
 
-    @ManyToOne
-    @JoinColumn(name = "attendance_id", referencedColumnName = "attendance_id")
-    private Attendance attendance;
+    @Type(type = "text")
+    @Column(name = "reason")
+    private String reason;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "employeeId", referencedColumnName = "employee_id")
+    private Employee employee;
 
 }

@@ -10,7 +10,6 @@ import org.hibernate.annotations.Type;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -42,15 +41,15 @@ public class Attendance extends BaseModel implements Serializable {
     @Column(name = "check_out_time")
     private Date checkOutTime;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id", referencedColumnName = "employee_id")
     private Employee employee;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "attendance_type_id", referencedColumnName = "attendance_type_id")
     private AttendanceType attendanceType;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "leave_detail_id", referencedColumnName = "leave_detail_id")
     private LeaveDetail leaveDetail;
 

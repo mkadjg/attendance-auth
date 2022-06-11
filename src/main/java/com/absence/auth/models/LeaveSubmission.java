@@ -10,7 +10,6 @@ import org.hibernate.annotations.Type;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -50,11 +49,15 @@ public class LeaveSubmission extends BaseModel implements Serializable {
     @Column(name = "hrd_id")
     private String hrdId;
 
-    @ManyToOne
+    @Type(type = "text")
+    @Column(name = "reason")
+    private String reason;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "submission_status_id", referencedColumnName = "submission_status_id")
     private SubmissionStatus submissionStatus;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id", referencedColumnName = "employee_id")
     private Employee employee;
 

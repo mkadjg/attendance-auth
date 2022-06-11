@@ -40,6 +40,10 @@ public class CustomAuthenticationManager implements AuthenticationManager {
             throw new BadCredentialException("Invalid username or password!");
         }
 
+        if (users.getStatus() != 1) {
+            throw new BadCredentialException("User is inactive!");
+        }
+
         String passwordHex = PasswordHashUtil.generate(loginRequestDto.getPassword());
         if (passwordHex.equals(users.getPassword())) {
 
@@ -76,7 +80,7 @@ public class CustomAuthenticationManager implements AuthenticationManager {
                     Date.from(tenMinuteBefore.atZone(ZoneId.systemDefault()).toInstant()));
             int totalFail = 0;
             for (UserLoginHistory loginHistory : userLoginHistories) {
-                if (!loginHistory.isStatus()) {
+                if (!loginHistory.getStatus()) {
                     totalFail++;
                 } else {
                     break;

@@ -10,7 +10,6 @@ import org.hibernate.annotations.Type;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
-import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -49,10 +48,14 @@ public class Employee extends BaseModel implements Serializable {
     private String employeePhoneNumber;
 
     @Column(name = "employee_gender")
-    private int employeeGender;
+    private Integer employeeGender;
 
     @Column(name = "is_supervisor")
-    private boolean isSupervisor;
+    private Integer isSupervisor;
+
+    @Lob
+    @Column(name = "employee_photo", columnDefinition = "BLOB")
+    private byte[] employeePhoto;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "user_id")

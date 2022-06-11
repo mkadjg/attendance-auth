@@ -5,11 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -32,6 +30,6 @@ public class LeaveType extends BaseModel implements Serializable {
     private String leaveTypeDesc;
 
     @Column(name = "default_value")
-    private int defaultValue;
+    private Integer defaultValue;
 
 }

@@ -8,10 +8,7 @@ import com.absence.auth.dtos.ResponseDto;
 import com.absence.auth.exceptions.BadCredentialException;
 import com.absence.auth.models.Employee;
 import com.absence.auth.models.Users;
-import com.absence.auth.repositories.EmployeeRepository;
-import com.absence.auth.repositories.UserLoginHistoryRepository;
-import com.absence.auth.repositories.UserRoleRepository;
-import com.absence.auth.repositories.UsersRepository;
+import com.absence.auth.repositories.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -30,7 +27,7 @@ import java.util.Date;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/user")
 public class LoginController {
 
     @Autowired
@@ -63,6 +60,7 @@ public class LoginController {
 
         Users users = mapper.convertValue(authentication.getDetails(), Users.class);
         Employee employee = employeeRepository.findByUserId(users.getUserId()).orElse(null);
+
         String token = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim("authorities", authentication.getAuthorities().stream()
@@ -76,8 +74,10 @@ public class LoginController {
         LoginResponseDto loginResponseDto = LoginResponseDto.builder()
                 .userId(users.getUserId())
                 .username(users.getUsername())
+                .employeeId(employee.getEmployeeId())
                 .employeeName(employee.getEmployeeName())
                 .token(token)
+                .division(employee.getDivision())
                 .roleName(authentication.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .build();

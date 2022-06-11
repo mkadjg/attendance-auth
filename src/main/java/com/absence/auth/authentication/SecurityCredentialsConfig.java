@@ -15,9 +15,6 @@ public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     JwtConfig jwtConfig;
 
-    @Autowired
-    private final CorsFilter corsFilter;
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -30,7 +27,6 @@ public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
             .exceptionHandling().accessDeniedHandler((req, rsp, e) -> ResponseFactory
                         .sendAccessDeniedErrorResponse(rsp))
             .and()
-            .addFilterBefore(corsFilter, ChannelProcessingFilter.class)
             .authorizeRequests()
             .and()
             .authorizeRequests()
@@ -38,10 +34,6 @@ public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.GET, "/").permitAll()
             .antMatchers(HttpMethod.POST, "/employee/**").permitAll()
             .anyRequest().authenticated();
-    }
-
-    public SecurityCredentialsConfig(CorsFilter corsFilter) {
-        this.corsFilter = corsFilter;
     }
 
 }

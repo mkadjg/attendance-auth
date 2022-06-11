@@ -4,11 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -33,7 +31,7 @@ public class UserLoginHistory {
     private String userId;
 
     @Column(name = "status")
-    private boolean status;
+    private Boolean status;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "login_date")

@@ -20,5 +20,5 @@ public class RegisterEmployeeRequestDto {
     private int employeeGender;
     private String divisionId;
     private String roleId;
-    private boolean isSupervisor;
+    private int isSupervisor;
 }
