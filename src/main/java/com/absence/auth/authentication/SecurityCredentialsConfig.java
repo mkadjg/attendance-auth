@@ -33,6 +33,7 @@ public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
             .antMatchers(HttpMethod.POST, jwtConfig.getUri()).permitAll()
             .antMatchers(HttpMethod.GET, "/").permitAll()
             .antMatchers(HttpMethod.POST, "/employee/**").permitAll()
+            .antMatchers(HttpMethod.GET, "/user/logout/**").permitAll()
             .anyRequest().authenticated();
     }
 

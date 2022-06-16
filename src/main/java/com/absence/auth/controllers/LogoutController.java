@@ -10,15 +10,12 @@ import com.absence.auth.repositories.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/user")
 public class LogoutController {
 
     @Autowired
@@ -27,9 +24,9 @@ public class LogoutController {
     @Autowired
     UserLoginHistoryRepository userLoginHistoryRepository;
 
-    @PostMapping("/logout")
-    public ResponseEntity<Object> logout(@RequestBody LogoutRequestDto dto) throws ResourceNotFoundException {
-        Users users = usersRepository.findByUsername(dto.getUsername()).orElse(null);
+    @GetMapping("/logout")
+    public ResponseEntity<Object> logout(@RequestHeader("user-audit-id") String userAuditId) throws ResourceNotFoundException {
+        Users users = usersRepository.findById(userAuditId).orElse(null);
         if (users != null) {
             UserLoginHistory userLoginHistory =  userLoginHistoryRepository.findUserLoginHistory(users.getUserId()).orElse(null);
             assert userLoginHistory != null;

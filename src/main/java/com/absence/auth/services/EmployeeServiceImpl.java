@@ -1,16 +1,23 @@
 package com.absence.auth.services;
 
 import com.absence.auth.dtos.RegisterEmployeeRequestDto;
-import com.absence.auth.models.Employee;
 import com.absence.auth.models.UserRole;
 import com.absence.auth.models.Users;
 import com.absence.auth.payloads.EmailPayload;
-import com.absence.auth.repositories.*;
+import com.absence.auth.payloads.EmployeeRequestPayload;
+import com.absence.auth.payloads.EmployeeResponsePayload;
+import com.absence.auth.repositories.RoleRepository;
+import com.absence.auth.repositories.UserRoleRepository;
+import com.absence.auth.repositories.UsersRepository;
 import com.absence.auth.utilities.DefaultPasswordGeneratorUtil;
 import com.absence.auth.utilities.PasswordHashUtil;
+import com.google.gson.Gson;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,13 +26,7 @@ import java.util.Map;
 public class EmployeeServiceImpl implements EmployeeService {
 
     @Autowired
-    EmployeeRepository employeeRepository;
-
-    @Autowired
     UsersRepository usersRepository;
-
-    @Autowired
-    DivisionRepository divisionRepository;
 
     @Autowired
     RoleRepository roleRepository;
@@ -38,6 +39,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Value("${login.url}")
     String loginUrl;
+
+    @Value("${absence.base.url}")
+    String absenceBaseUrl;
 
     private static final String HRD_DIV_ID = "fcb90b90-b56b-4a98-b778-83848096cbc6";
     private static final String HRD_ROLE_ID = "b618e0ef-9932-40bc-9f7c-174cf2b6aebe";
@@ -52,7 +56,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         users.setCreatedBy(userAuditId);
         Users newUsers = usersRepository.save(users);
 
-        Employee employee = new Employee();
+        EmployeeRequestPayload employee = new EmployeeRequestPayload();
         employee.setEmployeeName(dto.getEmployeeName());
         employee.setEmployeeAddress(dto.getEmployeeAddress());
         employee.setEmployeeNumber(dto.getEmployeeNumber());
@@ -62,9 +66,8 @@ public class EmployeeServiceImpl implements EmployeeService {
         employee.setEmployeePhoneNumber(dto.getEmployeePhoneNumber());
         employee.setEmployeeGender(dto.getEmployeeGender());
         employee.setIsSupervisor(dto.getIsSupervisor());
-        employee.setUsers(newUsers);
-        employee.setCreatedBy(userAuditId);
-        employee.setDivision(divisionRepository.findById(dto.getDivisionId()).orElse(null));
+        employee.setUserId(newUsers.getUserId());
+        employee.setDivisionId(dto.getDivisionId());
 
         UserRole employeeRole = new UserRole();
         employeeRole.setUsers(newUsers);
@@ -72,7 +75,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeRole.setRole(roleRepository.findById(EMPLOYEE_ROLE_ID).orElse(null));
         userRoleRepository.save(employeeRole);
 
-        if (employee.getDivision().getDivisionId().equals(HRD_DIV_ID)) {
+        if (dto.getDivisionId().equals(HRD_DIV_ID)) {
             UserRole hrdRole = new UserRole();
             hrdRole.setUsers(newUsers);
             hrdRole.setCreatedBy(userAuditId);
@@ -88,13 +91,25 @@ public class EmployeeServiceImpl implements EmployeeService {
             userRoleRepository.save(supervisorRole);
         }
 
-        return employeeRepository.save(employee);
+        RestTemplate restTemplate = new RestTemplate();
+        String url = absenceBaseUrl + "/employee/create";
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("user-audit-id", userAuditId);
+        HttpEntity<EmployeeRequestPayload> requestEntity = new HttpEntity<>(employee, headers);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            return toEmployeeResponsePayload(response.getBody());
+        } else {
+            return null;
+        }
     }
 
     @Override
-    public Boolean sendEmailUserRegistration(Users users) {
+    public Boolean sendEmailUserRegistration(String userId) {
         try {
+            Users users = usersRepository.findById(userId).orElse(null);
             String defaultPassword = DefaultPasswordGeneratorUtil.generateRandomPassword();
+            assert users != null;
             users.setPassword(PasswordHashUtil.generate(defaultPassword));
             usersRepository.save(users);
 
@@ -113,5 +128,25 @@ public class EmployeeServiceImpl implements EmployeeService {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Override
+    public EmployeeResponsePayload findEmployeeByUserId(String userId) {
+        RestTemplate restTemplate = new RestTemplate();
+        String url = absenceBaseUrl + "/employee/find-by-user-id/" + userId;
+        HttpEntity<Void> requestEntity = new HttpEntity<>(null, new HttpHeaders());
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
+        if (response.getStatusCode() == HttpStatus.OK) {
+            return toEmployeeResponsePayload(response.getBody());
+        } else {
+            return null;
+        }
+    }
+
+    private EmployeeResponsePayload toEmployeeResponsePayload(String root) {
+        JSONObject jsonRoot = new JSONObject(root);
+        JSONObject jsonBody = new JSONObject(jsonRoot.get("data").toString());
+        Gson gson = new Gson();
+        return gson.fromJson(jsonBody.toString(), EmployeeResponsePayload.class);
     }
 }

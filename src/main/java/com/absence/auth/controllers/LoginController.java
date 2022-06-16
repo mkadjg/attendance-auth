@@ -6,9 +6,10 @@ import com.absence.auth.dtos.LoginRequestDto;
 import com.absence.auth.dtos.LoginResponseDto;
 import com.absence.auth.dtos.ResponseDto;
 import com.absence.auth.exceptions.BadCredentialException;
-import com.absence.auth.models.Employee;
 import com.absence.auth.models.Users;
+import com.absence.auth.payloads.EmployeeResponsePayload;
 import com.absence.auth.repositories.*;
+import com.absence.auth.services.EmployeeService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -43,7 +44,7 @@ public class LoginController {
     UserRoleRepository userRoleRepository;
 
     @Autowired
-    EmployeeRepository employeeRepository;
+    EmployeeService employeeService;
 
     @Autowired
     JwtConfig jwtConfig;
@@ -51,7 +52,7 @@ public class LoginController {
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody LoginRequestDto loginRequestDto) throws BadCredentialException {
         Authentication authentication = customAuthenticationManager.authenticate(loginRequestDto, usersRepository, userLoginHistoryRepository,
-                userRoleRepository, jwtConfig);
+                    userRoleRepository, jwtConfig);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -59,7 +60,7 @@ public class LoginController {
         long now = System.currentTimeMillis();
 
         Users users = mapper.convertValue(authentication.getDetails(), Users.class);
-        Employee employee = employeeRepository.findByUserId(users.getUserId()).orElse(null);
+        EmployeeResponsePayload employee = employeeService.findEmployeeByUserId(users.getUserId());
 
         String token = Jwts.builder()
                 .setSubject(authentication.getName())
@@ -77,7 +78,8 @@ public class LoginController {
                 .employeeId(employee.getEmployeeId())
                 .employeeName(employee.getEmployeeName())
                 .token(token)
-                .division(employee.getDivision())
+                .jobTitle(employee.getJobTitle())
+                .employeePhoto(employee.getEmployeePhoto())
                 .roleName(authentication.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .build();
