@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface UserOtpRepository extends JpaRepository<UserOtp, String> {
 
-    @Query("select uo from UserOtp uo where users.userId =:userId")
+    @Query("select uo from UserOtp uo where uo.users.userId =:userId")
     Optional<UserOtp> findUserOtpByUsersId(String userId);
 
 }

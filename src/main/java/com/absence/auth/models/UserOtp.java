@@ -23,7 +23,7 @@ public class UserOtp extends BaseModel implements Serializable {
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     @Column(name = "user_otp_id", nullable = false, unique = true)
-    private UUID userOtpId = UUID.randomUUID();
+    private String userOtpId;
 
     @Column(name = "otp_number")
     private String otpNumber;

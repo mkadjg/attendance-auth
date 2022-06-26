@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/forgot-password")
 public class ForgotPasswordController {
 
     @Autowired
@@ -46,7 +46,7 @@ public class ForgotPasswordController {
     @Autowired
     JwtConfig jwtConfig;
 
-    @GetMapping("/forgot-password/send-otp")
+    @GetMapping("/send-otp")
     public ResponseEntity<Object> sendOtp(@RequestParam("email") String email) throws ResourceNotFoundException, SendEmailException {
         Users users = usersRepository.findByUsername(email).orElse(null);
         if (users != null) {
@@ -66,7 +66,7 @@ public class ForgotPasswordController {
         }
     }
 
-    @PostMapping("/forgot-password/validate-otp")
+    @PostMapping("/validate-otp")
     public ResponseEntity<Object> validateOtp(@RequestBody ValidateOtpRequestDto dto) throws ResourceNotFoundException, InputValidationException {
         Users users = usersRepository.findByUsername(dto.getEmail()).orElse(null);
         if (users != null) {
@@ -104,7 +104,7 @@ public class ForgotPasswordController {
         }
     }
 
-    @PostMapping("/forgot-password/new-password")
+    @PostMapping("/new-password")
     public ResponseEntity<Object> newPassword(@RequestBody NewPasswordRequestDto dto) throws ResourceNotFoundException {
         Users users = usersRepository.findByUsername(dto.getEmail()).orElse(null);
         if (users != null) {
@@ -112,7 +112,7 @@ public class ForgotPasswordController {
             ResponseDto responseDto = ResponseDto.builder()
                     .code(HttpStatus.OK.toString())
                     .status("success")
-                    .data(null)
+                    .data(usersRepository.save(users))
                     .message("Successfully save new password!")
                     .build();
             return ResponseEntity.ok(responseDto);

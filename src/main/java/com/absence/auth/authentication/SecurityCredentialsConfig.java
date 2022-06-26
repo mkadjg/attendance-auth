@@ -32,8 +32,12 @@ public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
             .authorizeRequests()
             .antMatchers(HttpMethod.POST, jwtConfig.getUri()).permitAll()
             .antMatchers(HttpMethod.GET, "/").permitAll()
-            .antMatchers(HttpMethod.POST, "/employee/**").permitAll()
             .antMatchers(HttpMethod.GET, "/user/logout/**").permitAll()
+            .antMatchers("/forgot-password/send-otp").permitAll()
+            .antMatchers("/forgot-password/validate-otp").permitAll()
+            .antMatchers("/forgot-password/new-password").permitAll()
+            // only hrd
+            .antMatchers(HttpMethod.POST, "/employee/**").hasAuthority("HRD")
             .anyRequest().authenticated();
     }
 

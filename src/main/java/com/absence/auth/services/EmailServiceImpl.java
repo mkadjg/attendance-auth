@@ -75,6 +75,7 @@ public class EmailServiceImpl implements EmailService {
             msg.setSentDate(new Date());
             Transport.send(msg);
         } catch (Exception e) {
+            e.printStackTrace();
             throw new SendEmailException("Failed to send email notification!");
         }
     }
