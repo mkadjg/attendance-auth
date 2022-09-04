@@ -19,6 +19,7 @@ public class RegisterEmployeeRequestDto {
     private String employeePhoneNumber;
     private int employeeGender;
     private String divisionId;
+    private String jobTitleId;
     private String roleId;
     private int isSupervisor;
 }

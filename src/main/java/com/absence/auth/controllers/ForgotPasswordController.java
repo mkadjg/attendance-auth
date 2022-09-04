@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/forgot-password")
+@RequestMapping("/auth/forgot-password")
 public class ForgotPasswordController {
 
     @Autowired

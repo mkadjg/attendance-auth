@@ -10,6 +10,7 @@ import com.absence.auth.repositories.RoleRepository;
 import com.absence.auth.repositories.UserRoleRepository;
 import com.absence.auth.repositories.UsersRepository;
 import com.absence.auth.utilities.DefaultPasswordGeneratorUtil;
+import com.absence.auth.utilities.EmployeeNumberGeneratorUtil;
 import com.absence.auth.utilities.PasswordHashUtil;
 import com.google.gson.Gson;
 import org.json.JSONObject;
@@ -59,13 +60,14 @@ public class EmployeeServiceImpl implements EmployeeService {
         EmployeeRequestPayload employee = new EmployeeRequestPayload();
         employee.setEmployeeName(dto.getEmployeeName());
         employee.setEmployeeAddress(dto.getEmployeeAddress());
-        employee.setEmployeeNumber(dto.getEmployeeNumber());
+        employee.setEmployeeNumber(EmployeeNumberGeneratorUtil.generate());
         employee.setEmployeeBirthdate(dto.getEmployeeBirthdate());
         employee.setEmployeeBirthplace(dto.getEmployeeBirthplace());
         employee.setEmployeeEmail(dto.getEmployeeEmail());
         employee.setEmployeePhoneNumber(dto.getEmployeePhoneNumber());
         employee.setEmployeeGender(dto.getEmployeeGender());
         employee.setIsSupervisor(dto.getIsSupervisor());
+        employee.setJobTitleId(dto.getJobTitleId());
         employee.setUserId(newUsers.getUserId());
         employee.setDivisionId(dto.getDivisionId());
 
@@ -95,6 +97,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         String url = absenceBaseUrl + "/employee/create";
         HttpHeaders headers = new HttpHeaders();
         headers.set("user-audit-id", userAuditId);
+        headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<EmployeeRequestPayload> requestEntity = new HttpEntity<>(employee, headers);
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
         if (response.getStatusCode() == HttpStatus.OK) {

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Date;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/auth")
 public class LogoutController {
 
     @Autowired

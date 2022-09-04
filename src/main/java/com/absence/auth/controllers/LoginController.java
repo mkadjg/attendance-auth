@@ -28,7 +28,7 @@ import java.util.Date;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/auth")
 public class LoginController {
 
     @Autowired

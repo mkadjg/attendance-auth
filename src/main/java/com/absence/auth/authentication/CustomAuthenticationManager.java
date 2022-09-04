@@ -94,7 +94,7 @@ public class CustomAuthenticationManager implements AuthenticationManager {
                 localDateTime = localDateTime.plusMinutes(jwtConfig.getExpirationInMinutes());
                 users.setLockedUntil(Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant()));
                 usersRepository.save(users);
-                throw new UsernameNotFoundException("Your account is Locked!, try again in 60 minutes");
+                throw new BadCredentialException("Your account is Locked!, try again in 60 minutes");
             }
             throw new BadCredentialException("Invalid username or password!");
         }
