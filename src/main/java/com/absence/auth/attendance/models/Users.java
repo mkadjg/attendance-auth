@@ -1,4 +1,4 @@
-package com.absence.auth.models;
+package com.absence.auth.attendance.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -30,11 +30,12 @@ public class Users extends BaseModel implements Serializable {
     private String username;
 
     @Type(type = "text")
+    @JsonIgnore
     @Column(name = "password")
     private String password;
 
     @Column(name = "status")
-    private Integer status;
+    private Boolean status;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "locked_until")

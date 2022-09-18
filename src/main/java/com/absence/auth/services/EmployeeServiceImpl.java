@@ -1,6 +1,11 @@
 package com.absence.auth.services;
 
+import com.absence.auth.attendance.models.Employee;
+import com.absence.auth.attendance.models.EmployeeLeave;
+import com.absence.auth.attendance.models.LeaveType;
+import com.absence.auth.attendance.repositories.*;
 import com.absence.auth.dtos.RegisterEmployeeRequestDto;
+import com.absence.auth.enums.LeaveTypeEnum;
 import com.absence.auth.models.UserRole;
 import com.absence.auth.models.Users;
 import com.absence.auth.payloads.EmailPayload;
@@ -13,6 +18,7 @@ import com.absence.auth.utilities.DefaultPasswordGeneratorUtil;
 import com.absence.auth.utilities.EmployeeNumberGeneratorUtil;
 import com.absence.auth.utilities.PasswordHashUtil;
 import com.google.gson.Gson;
+import com.netflix.discovery.converters.Auto;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +42,18 @@ public class EmployeeServiceImpl implements EmployeeService {
     UserRoleRepository userRoleRepository;
 
     @Autowired
+    JobTitleRepository jobTitleRepository;
+
+    @Autowired
+    EmployeeRepository employeeRepository;
+
+    @Autowired
+    LeaveTypeRepository leaveTypeRepository;
+
+    @Autowired
+    EmployeeLeaveRepository employeeLeaveRepository;
+
+    @Autowired
     EmailService emailService;
 
     @Value("${login.url}")
@@ -50,26 +68,12 @@ public class EmployeeServiceImpl implements EmployeeService {
     private static final String SPV_ROLE_ID = "e12ce118-ca9d-4da5-8d74-8b7f2696f57a";
 
     @Override
-    public Object register(RegisterEmployeeRequestDto dto, String userAuditId) {
+    public Employee register(RegisterEmployeeRequestDto dto, String userAuditId) {
         Users users = new Users();
         users.setUsername(dto.getEmployeeEmail());
         users.setStatus(1);
         users.setCreatedBy(userAuditId);
         Users newUsers = usersRepository.save(users);
-
-        EmployeeRequestPayload employee = new EmployeeRequestPayload();
-        employee.setEmployeeName(dto.getEmployeeName());
-        employee.setEmployeeAddress(dto.getEmployeeAddress());
-        employee.setEmployeeNumber(EmployeeNumberGeneratorUtil.generate());
-        employee.setEmployeeBirthdate(dto.getEmployeeBirthdate());
-        employee.setEmployeeBirthplace(dto.getEmployeeBirthplace());
-        employee.setEmployeeEmail(dto.getEmployeeEmail());
-        employee.setEmployeePhoneNumber(dto.getEmployeePhoneNumber());
-        employee.setEmployeeGender(dto.getEmployeeGender());
-        employee.setIsSupervisor(dto.getIsSupervisor());
-        employee.setJobTitleId(dto.getJobTitleId());
-        employee.setUserId(newUsers.getUserId());
-        employee.setDivisionId(dto.getDivisionId());
 
         UserRole employeeRole = new UserRole();
         employeeRole.setUsers(newUsers);
@@ -93,18 +97,46 @@ public class EmployeeServiceImpl implements EmployeeService {
             userRoleRepository.save(supervisorRole);
         }
 
-        RestTemplate restTemplate = new RestTemplate();
-        String url = absenceBaseUrl + "/employee/create";
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("user-audit-id", userAuditId);
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<EmployeeRequestPayload> requestEntity = new HttpEntity<>(employee, headers);
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, requestEntity, String.class);
-        if (response.getStatusCode() == HttpStatus.OK) {
-            return toEmployeeResponsePayload(response.getBody());
-        } else {
-            return null;
+        Employee employee = new Employee();
+        employee.setEmployeeName(dto.getEmployeeName());
+        employee.setEmployeeAddress(dto.getEmployeeAddress());
+        employee.setEmployeeNumber(EmployeeNumberGeneratorUtil.generate());
+        employee.setEmployeeBirthdate(dto.getEmployeeBirthdate());
+        employee.setEmployeeBirthplace(dto.getEmployeeBirthplace());
+        employee.setEmployeeEmail(dto.getEmployeeEmail());
+        employee.setEmployeePhoneNumber(dto.getEmployeePhoneNumber());
+        employee.setEmployeeGender(dto.getEmployeeGender());
+        employee.setIsSupervisor(dto.getIsSupervisor());
+        jobTitleRepository.findById(dto.getJobTitleId()).ifPresent(employee::setJobTitle);
+        employee.setUserId(newUsers.getUserId());
+
+        Employee result = employeeRepository.save(employee);
+
+        // cuti tahunan
+        EmployeeLeave yearLeave = new EmployeeLeave();
+        yearLeave.setEmployee(result);
+        LeaveType yearleaveType = leaveTypeRepository.findById(LeaveTypeEnum.CUTI_TAHUNAN.label)
+                .orElse(null);
+        if (yearleaveType != null) {
+            yearLeave.setLeaveType(yearleaveType);
+            yearLeave.setAvailable(yearleaveType.getDefaultValue());
+            yearLeave.setUsed(0);
         }
+        employeeLeaveRepository.save(yearLeave);
+
+        // cuti lintas tahun
+        EmployeeLeave crossYearLeave = new EmployeeLeave();
+        crossYearLeave.setEmployee(result);
+        LeaveType crossYearLeaveType = leaveTypeRepository.findById(LeaveTypeEnum.CUTI_LINTAS_TAHUN.label)
+                .orElse(null);
+        if (crossYearLeaveType != null) {
+            crossYearLeave.setLeaveType(crossYearLeaveType);
+            crossYearLeave.setAvailable(crossYearLeaveType.getDefaultValue());
+            crossYearLeave.setUsed(0);
+        }
+        employeeLeaveRepository.save(crossYearLeave);
+
+        return result;
     }
 
     @Override

@@ -26,7 +26,7 @@ public class ChangePasswordController {
         if (users != null) {
             String oldPasswordHex = PasswordHashUtil.generate(dto.getOldPassword());
             if (oldPasswordHex.equals(users.getPassword())) {
-                users.setPassword(dto.getNewPassword());
+                users.setPassword(PasswordHashUtil.generate(dto.getNewPassword()));
                 usersRepository.save(users);
 
                 ResponseDto responseDto = ResponseDto.builder()
