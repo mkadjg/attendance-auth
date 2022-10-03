@@ -14,6 +14,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.util.Arrays;
+import java.util.List;
+
 @EnableWebSecurity
 public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
 
@@ -25,6 +28,28 @@ public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     ApplicationRepository applicationRepository;
+
+    public static final String HRD = "HRD";
+    public static final String SUPERVISOR = "Supervisor";
+    public static final String EMPLOYEE = "Employee";
+
+    List<String> hrdResources = List.of(
+            "/absence/employee/**",
+            "/absence/division/**",
+            "/absence/holiday/**",
+            "/absence/leave-type/create",
+            "/absence/leave-type/update",
+            "/absence/leave-type/delete",
+            "/absence/job-title/**"
+    );
+
+    List<String> employeeResources = List.of(
+            "/absence/employee"
+    );
+
+    List<String> supervisorResources = List.of(
+            "/absence/project/**"
+    );
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -50,7 +75,7 @@ public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
             .antMatchers("/auth/forgot-password/validate-otp").permitAll()
             .antMatchers("/auth/forgot-password/new-password").permitAll()
             // only hrd
-            .antMatchers(HttpMethod.POST, "/employee/**").hasAuthority("HRD")
+            .antMatchers(hrdResources.toArray(new String[0])).hasAuthority(HRD)
             .anyRequest().authenticated();
     }
 
@@ -63,5 +88,7 @@ public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
         return new JwtTokenAuthenticationFilter(
                 jwtConfig, applicationRepository);
     }
+
+
 
 }

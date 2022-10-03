@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.stream.Collectors;
 
@@ -50,9 +51,11 @@ public class LoginController {
     JwtConfig jwtConfig;
 
     @PostMapping("/login")
-    public ResponseEntity<Object> login(@RequestBody LoginRequestDto loginRequestDto) throws BadCredentialException {
+    public ResponseEntity<Object> login(@RequestBody LoginRequestDto loginRequestDto,
+                                        HttpServletRequest request) throws BadCredentialException {
+
         Authentication authentication = customAuthenticationManager.authenticate(loginRequestDto, usersRepository, userLoginHistoryRepository,
-                    userRoleRepository, jwtConfig);
+                    userRoleRepository, jwtConfig, request);
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 

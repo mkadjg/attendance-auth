@@ -36,6 +36,9 @@ public class Users extends BaseModel implements Serializable {
     @Column(name = "status")
     private Integer status;
 
+    @Column(name = "locked_status")
+    private Integer lockedStatus;
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "locked_until")
     private Date lockedUntil;
