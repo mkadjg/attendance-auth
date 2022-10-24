@@ -2,7 +2,6 @@ package com.absence.auth.authentication;
 
 import com.absence.auth.config.CorsFilter;
 import com.absence.auth.factories.ResponseFactory;
-import com.absence.auth.repositories.ApplicationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -14,7 +13,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.util.Arrays;
 import java.util.List;
 
 @EnableWebSecurity
@@ -25,9 +23,6 @@ public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     CorsFilter corsFilter;
-
-    @Autowired
-    ApplicationRepository applicationRepository;
 
     public static final String HRD = "HRD";
     public static final String SUPERVISOR = "Supervisor";
@@ -44,7 +39,8 @@ public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
     );
 
     List<String> employeeResources = List.of(
-            "/absence/employee"
+            "/absence/employee",
+            "/absence/project/find-by-division/**"
     );
 
     List<String> supervisorResources = List.of(
@@ -76,6 +72,10 @@ public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
             .antMatchers("/auth/forgot-password/new-password").permitAll()
             // only hrd
             .antMatchers(hrdResources.toArray(new String[0])).hasAuthority(HRD)
+            // only employee
+            .antMatchers(employeeResources.toArray(new String[0])).hasAuthority(EMPLOYEE)
+            // supervisorResources
+            .antMatchers(supervisorResources.toArray(new String[0])).hasAuthority(SUPERVISOR)
             .anyRequest().authenticated();
     }
 
@@ -86,7 +86,7 @@ public class SecurityCredentialsConfig extends WebSecurityConfigurerAdapter {
 
     private JwtTokenAuthenticationFilter jwtTokenAuthenticationFilter() {
         return new JwtTokenAuthenticationFilter(
-                jwtConfig, applicationRepository);
+                jwtConfig);
     }
 
 

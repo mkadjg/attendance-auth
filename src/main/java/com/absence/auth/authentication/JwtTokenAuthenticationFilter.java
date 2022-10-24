@@ -3,7 +3,6 @@ package com.absence.auth.authentication;
 import com.absence.auth.exceptions.AuthorizationException;
 import com.absence.auth.exceptions.SkipFilterException;
 import com.absence.auth.factories.ResponseFactory;
-import com.absence.auth.repositories.ApplicationRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.lang.Nullable;
@@ -25,12 +24,9 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtConfig jwtConfig;
 
-    private final ApplicationRepository applicationRepository;
-
     public JwtTokenAuthenticationFilter(
-            JwtConfig jwtConfig, ApplicationRepository applicationRepository) {
+            JwtConfig jwtConfig) {
         this.jwtConfig = jwtConfig;
-        this.applicationRepository = applicationRepository;
     }
 
     @Override
@@ -45,8 +41,6 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
             String path = request.getServletPath();
             verifyApiPath(path);
 
-            String applicationID = request.getHeader("Application-ID");
-//            verifyApplicationID(applicationID);
             Claims claims = getClaims(request, response);
 
             String username = getUsername(claims);
@@ -121,13 +115,5 @@ public class JwtTokenAuthenticationFilter extends OncePerRequestFilter {
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
             username, null, authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
         SecurityContextHolder.getContext().setAuthentication(auth);
-    }
-
-    private void verifyApplicationID(String applicationID) throws AuthorizationException {
-        if (applicationID == null || applicationRepository.findAll()
-                .stream()
-                .noneMatch(application -> application.getApplicationName().equals(applicationID))) {
-            throw new AuthorizationException();
-        }
     }
 }
